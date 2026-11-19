@@ -2,8 +2,8 @@
 
 import { useEffect, useId, useRef, useState, type ComponentType, type KeyboardEvent } from "react";
 import { ChevronDown, Download, FileText, Presentation, Spinner } from "@/components/icons";
-import { exportPdf } from "../export/export-pdf";
-import { exportPptx } from "../export/export-pptx";
+import { exportPdf } from "../export/pdf/export-pdf";
+import { exportPptx } from "../export/pptx/export-pptx";
 import type { DailyNews } from "../schema";
 
 type Format = "pdf" | "pptx";

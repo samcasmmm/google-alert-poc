@@ -1,23 +1,10 @@
 "use client";
 
-import { createContext, use, useCallback, useEffect, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Expand, Restart } from "@/components/icons";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, Expand } from "@/components/icons";
 import { SiteHeader } from "@/components/site-header";
-import { primaryButton } from "@/components/ui";
+import { DeckContext } from "./deck-context";
 
-const DeckContext = createContext<(() => void) | null>(null);
-
-/** "Start over" for the end slide: jumps back to the first slide. */
-export function RestartButton() {
-  const restart = use(DeckContext);
-  if (!restart) return null;
-  return (
-    <button type="button" onClick={restart} className={`${primaryButton} gap-2`}>
-      <Restart size={16} />
-      Start over
-    </button>
-  );
-}
 
 function isInteractive(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && !!target.closest("a, button, input, textarea, select");

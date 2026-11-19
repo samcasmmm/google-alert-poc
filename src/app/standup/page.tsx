@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BlankScreen, StandupView } from "./standup-view";
+import { BlankScreen } from "@/components/blank-screen";
+import { StandupView } from "@/features/news/components/standup/standup-view";
 
 export const metadata: Metadata = { title: "Today · Standup News" };
 

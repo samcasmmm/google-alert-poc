@@ -1,21 +1,16 @@
-import { createElement } from "react";
-import type { DailyNews } from "../schema";
-import { exportFileName } from "./export-pptx";
+import type { DailyNews } from "../../schema";
+import { downloadBlob, exportFileName } from "../file-name";
 
-/** Builds the 16:9 PDF in the browser and downloads it. The renderer loads only on use. */
+/**
+ * Builds the 16:9 PDF in the browser and downloads it: no print dialog, so paper
+ * size, margins and "background graphics" settings can't change how it looks.
+ * The renderer (~0.5MB) loads only when someone exports.
+ */
 export async function exportPdf(news: DailyNews, company: string): Promise<void> {
-  const [{ pdf }, { BriefingDocument }] = await Promise.all([
+  const [{ pdf }, { buildBriefingDocument }] = await Promise.all([
     import("@react-pdf/renderer"),
-    import("./pdf-document"),
+    import("./briefing-document"),
   ]);
-  const blob = await pdf(createElement(BriefingDocument, { news, company })).toBlob();
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = exportFileName(news, "pdf");
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  const blob = await pdf(buildBriefingDocument(news, company)).toBlob();
+  downloadBlob(blob, exportFileName(news, "pdf"));
 }

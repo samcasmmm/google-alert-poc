@@ -1,6 +1,7 @@
 import type PptxGenJS from "pptxgenjs";
 import { formatDayLong, formatTimestamp } from "@/lib/date";
-import type { DailyNews, NewsItem } from "../schema";
+import type { DailyNews, NewsItem } from "../../schema";
+import { exportFileName } from "../file-name";
 
 // Editable PowerPoint version of the briefing, built in the browser. Mirrors the
 // "Editorial" slide layout with fonts every PowerPoint / Keynote / Slides has.
@@ -165,10 +166,6 @@ function endSlide(pptx: PptxGenJS, news: DailyNews, page: number, pages: number)
     fontFace: SERIF, fontSize: 60, color: C.ink, align: "center", valign: "middle", margin: 0,
   });
   footer(slide, news.date, page, pages);
-}
-
-export function exportFileName(news: DailyNews, ext: string): string {
-  return `standup-news-${news.date}.${ext}`;
 }
 
 /** Builds the deck and triggers a download. */

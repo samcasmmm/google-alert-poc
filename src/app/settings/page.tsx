@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/page-shell";
 import { ConfigForm } from "@/features/config/components/config-form";
-import { DataSection } from "./data-section";
+import { DataSection } from "@/features/config/components/data-section";
 
 export const metadata: Metadata = { title: "Settings · Standup News" };
 

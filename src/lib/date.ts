@@ -38,6 +38,13 @@ export function weekdayOf(key: string): number {
   return keyToDate(key).getUTCDay();
 }
 
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** "Thursday" */
+export function weekdayName(key: string): string {
+  return WEEKDAYS[weekdayOf(key)];
+}
+
 export function formatDayLong(key: string): string {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
