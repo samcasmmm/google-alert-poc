@@ -34,9 +34,9 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
   - `→` / `Space` / clicking the right side goes forward. `←` / clicking the left side goes back.
   - `F` toggles fullscreen.
   - **Fetch again** on the title slide fetches today's news again.
-- **`/history`**: past days saved in this browser. Click one to replay its slides.
+- **`/history`**: every saved day, grouped by month. Search all saved stories (`/` focuses search); click a headline to open that day's slides at that story, download any day as PDF, or delete a day (with Undo).
 - **Export (slide deck header):** **PDF** downloads a 16:9 PDF built in the browser (no print dialog, so paper size and printer settings can't change it): a cover with clickable contents, one page per story with "why it matters" in a vermilion panel, and a sources page with every link. **PowerPoint** downloads an editable `.pptx` with the summary and link in the speaker notes.
-- **`/settings`**: company brief, news sources, slide layout, advanced options, and Export/Import of all data as JSON.
+- **`/settings`**: company brief, news sources (named feeds; paste several URLs at once), AI summaries (Groq key and model), briefing options (stories per day, time zone, slide layout) and Backup (download / restore all data as JSON). A save bar appears when there are unsaved changes; `Ctrl/Cmd+S` saves.
 
 ### How news is fetched
 1. On `/standup` (**Today**), the app looks in IndexedDB for today's news. Nothing is fetched automatically.
@@ -58,10 +58,14 @@ src/
   components/             Shared UI with no feature knowledge: site-header, app-nav, page-shell,
                           blank-screen, reveal-text, icons (one icon-set module), ui (class strings)
   features/
-    config/               Settings: schema.ts (zod), config.ts (IndexedDB load/save), preset.ts
-      components/         config-form, config-form-body, form-section, form-field, layout-preview,
-                          data-section (backup export / import)
-    history/components/   history-list
+    config/               Settings: schema.ts (zod), config.ts (IndexedDB load/save), preset.ts,
+                          draft.ts (form working copy, dirty check, validation)
+      components/         config-form, config-form-body, settings-nav, save-bar, form-section, form-field,
+                          brief-section, feeds-section, feed-row, add-feeds-field, ai-section, secret-input,
+                          briefing-section, story-count-picker, layout-picker, layout-preview, data-section
+    history/              search.ts (story search + month grouping)
+      components/         history-list, history-search, history-month, history-day, history-story,
+                          highlight, history-empty, delete-notice
     news/
       schema.ts           NewsItem / DailyNews types shared by server and browser
       headline.ts         Headline cleanup (drops Google Alerts' " - Publisher" suffix)

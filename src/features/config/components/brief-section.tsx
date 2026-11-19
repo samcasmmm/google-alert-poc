@@ -28,14 +28,15 @@ export function BriefSection({ brief, onChange }: { brief: Brief; onChange: (bri
           const nearLimit = value.length > field.maxLength * 0.8;
           return (
             <FormField key={field.key} label={field.label} hint={field.hint} htmlFor={id}>
-              {field.rows > 1 ? (
+              {field.key !== "company" ? (
                 <textarea
                   id={id}
                   value={value}
                   onChange={(e) => set(e.target.value)}
                   maxLength={field.maxLength}
                   placeholder={field.placeholder}
-                  className={`${inputClass} field-sizing-content min-h-24 resize-none leading-relaxed`}
+                  rows={1}
+                  className={`${inputClass} field-sizing-content resize-none leading-relaxed ${field.rows > 1 ? "min-h-24" : "min-h-11"}`}
                 />
               ) : (
                 <input
