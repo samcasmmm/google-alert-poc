@@ -35,7 +35,7 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
   - `F` toggles fullscreen.
   - **Fetch again** on the title slide fetches today's news again.
 - **`/history`**: past days saved in this browser. Click one to replay its slides.
-- **Export (slide deck header):** **PDF** opens the print dialog with a colour 16:9 PDF: cover with contents, one page per story, and a closing page with all source links (pick "Save as PDF"; Ctrl/Cmd+P works too). **PowerPoint** downloads an editable `.pptx` with the summary and link in the speaker notes.
+- **Export (slide deck header):** **PDF** downloads a 16:9 PDF built in the browser (no print dialog, so paper size and printer settings can't change it): a cover with clickable contents, one page per story with "why it matters" in a vermilion panel, and a sources page with every link. **PowerPoint** downloads an editable `.pptx` with the summary and link in the speaker notes.
 - **`/settings`**: company brief, news sources, slide layout, advanced options, and Export/Import of all data as JSON.
 
 ### How news is fetched
@@ -48,6 +48,46 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
 7. If Groq fails, you get the latest items with their feed snippets instead. Click **Fetch again** to retry.
 
 > **Data lives in one browser.** Run standup from the same browser each day, or use **Export / Import** to move data between machines. The export includes your Groq key, so keep the file private.
+
+## Code structure
+
+```
+src/
+  app/                    Routes only (Next.js App Router). Pages stay thin and import from features/.
+    api/news/route.ts     POST /api/news: fetch feeds, rank with Groq, return the day's briefing
+  components/             Shared UI with no feature knowledge: site-header, app-nav, page-shell,
+                          blank-screen, reveal-text, icons (one icon-set module), ui (class strings)
+  features/
+    config/               Settings: schema.ts (zod), config.ts (IndexedDB load/save), preset.ts
+      components/         config-form, config-form-body, form-section, form-field, layout-preview,
+                          data-section (backup export / import)
+    history/components/   history-list
+    news/
+      schema.ts           NewsItem / DailyNews types shared by server and browser
+      headline.ts         Headline cleanup (drops Google Alerts' " - Publisher" suffix)
+      use-daily-news.ts   The day's briefing from IndexedDB + fetchNews()
+      server/             Server-only: feeds.ts (RSS), rank.ts (Groq + per-feed limits), build-daily-news.ts
+      components/
+        standup/          The Today page: standup-view, standup-day, today-landing, fetch-progress, empty-day
+        deck/             slide-deck, restart-button, deck-context
+        layouts/          Slide designs: editorial/, poster/, briefing/ (title-, story-, end-slide each),
+                          shared article-link, format, types; index.ts maps Settings choice → layout
+        export-menu.tsx   Export button and menu
+      export/             File builders (no React UI)
+        file-name.ts      File names + download helper
+        pdf/              react-pdf: briefing-document, cover-page, story-page, sources-page,
+                          page-footer, styles, theme, fonts, format, export-pdf
+        pptx/             export-pptx (pptxgenjs)
+  lib/                    Framework-agnostic helpers: db (Dexie), date, backup, use-today
+public/fonts/             Static Newsreader + Geist TTFs (OFL) embedded in the PDF
+```
+
+Conventions:
+
+- **One component per file**, named after the component in kebab-case (`StoryPage` → `story-page.tsx`). `icons.tsx` is the one exception: it is a single icon set.
+- `app/` holds routes, metadata and route handlers only; UI and logic live in `features/` (or `components/` when shared by several features).
+- Code under `server/` runs only on the server; `export/` runs only in the browser and loads its libraries (react-pdf, pptxgenjs) on demand.
+- Imports across features use `@/…`; imports within a feature use relative paths.
 
 ## Google Alerts RSS
 

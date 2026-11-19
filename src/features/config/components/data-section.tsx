@@ -5,7 +5,9 @@ import { Download, Upload } from "@/components/icons";
 import { secondaryButton } from "@/components/ui";
 import { exportData, importData } from "@/lib/backup";
 import { dateKey } from "@/lib/date";
+import { FormSection } from "./form-section";
 
+/** Download all data as a JSON backup, or restore one (replaces everything in this browser). */
 export function DataSection() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
@@ -26,30 +28,30 @@ export function DataSection() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (!confirm("Importing replaces ALL data in this browser (saved news and settings). Continue?")) return;
+    if (!confirm("Restoring replaces all saved briefings and settings in this browser. Continue?")) return;
     try {
       const tables = await importData(JSON.parse(await file.text()));
       setMessage({
         tone: "ok",
-        text: `Imported ${tables.news.length} days of news and your settings.`,
+        text: `Restored ${tables.news.length} saved ${tables.news.length === 1 ? "briefing" : "briefings"} and your settings.`,
       });
     } catch (error) {
-      setMessage({ tone: "error", text: error instanceof Error ? error.message : "Import failed." });
+      setMessage({ tone: "error", text: error instanceof Error ? error.message : "That file isn’t a Standup News backup." });
     }
   }
 
   return (
-    <div>
-      <p className="text-sm text-muted">
-        Everything is stored in this browser only. Export a backup to move it to another machine or keep a copy.
-        The backup includes your Groq API key, so keep the file private.
-      </p>
-      <div className="mt-4 flex flex-wrap gap-2">
+    <FormSection
+      id="backup"
+      title="Backup"
+      description="Everything lives in this browser only. Download a backup to keep a copy or move to another computer. It includes your Groq API key, so keep the file private."
+    >
+      <div className="flex flex-wrap gap-2">
         <button type="button" onClick={() => void onExport()} className={`${secondaryButton} gap-2`}>
-          <Download size={16} /> Export JSON
+          <Download size={16} /> Download backup
         </button>
         <button type="button" onClick={() => fileInput.current?.click()} className={`${secondaryButton} gap-2`}>
-          <Upload size={16} /> Import JSON
+          <Upload size={16} /> Restore from backup
         </button>
         <input ref={fileInput} type="file" accept="application/json,.json" onChange={onImport} className="hidden" />
       </div>
@@ -58,6 +60,6 @@ export function DataSection() {
           {message.text}
         </p>
       )}
-    </div>
+    </FormSection>
   );
 }

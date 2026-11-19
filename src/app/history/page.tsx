@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "History · Standup News" };
 
 export default function HistoryPage() {
   return (
-    <PageShell title="Past standups">
+    <PageShell title="History" wide>
       <HistoryList />
     </PageShell>
   );

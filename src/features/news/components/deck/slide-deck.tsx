@@ -20,12 +20,15 @@ const iconButton =
 export function SlideDeck({
   slides,
   actions,
+  initialIndex = 0,
 }: {
   slides: ReactNode[];
   /** extra header controls, e.g. export */
   actions?: ReactNode;
+  /** Slide shown first (clamped to the deck). */
+  initialIndex?: number;
 }) {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => Math.min(Math.max(0, initialIndex), slides.length - 1));
   const [direction, setDirection] = useState<"next" | "prev">("next");
   const last = slides.length - 1;
 

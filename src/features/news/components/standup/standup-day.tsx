@@ -14,7 +14,18 @@ import { EmptyDay } from "./empty-day";
 import { TodayLanding } from "./today-landing";
 
 /** One day: the slides if its briefing is saved, otherwise the fetch screen (today) or an empty state. */
-export function StandupDay({ date, isToday, config }: { date: string; isToday: boolean; config: AppConfig }) {
+export function StandupDay({
+  date,
+  isToday,
+  config,
+  startAt = 0,
+}: {
+  date: string;
+  isToday: boolean;
+  config: AppConfig;
+  /** Slide to open on: 0 = title, n = story n. */
+  startAt?: number;
+}) {
   const daily = useDailyNews(date, config);
 
   if (!daily.ready) return <BlankScreen />;
@@ -74,6 +85,6 @@ export function StandupDay({ date, isToday, config }: { date: string; isToday: b
   ];
 
   return (
-    <SlideDeck slides={slides} actions={<ExportMenu news={news} company={config.brief.company} />} />
+    <SlideDeck slides={slides} initialIndex={startAt} actions={<ExportMenu news={news} company={config.brief.company} />} />
   );
 }

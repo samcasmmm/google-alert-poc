@@ -1,70 +1,98 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import Link from "next/link";
-import { ArrowRight, Newspaper, Trash } from "@/components/icons";
-import { primaryButton, quietButton } from "@/components/ui";
-import { db } from "@/lib/db";
-import { formatDayShort } from "@/lib/date";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import { useConfig } from "@/features/config/config";
+import { db, type StoredNews } from "@/lib/db";
+import { groupByMonth, queryTerms, searchDays } from "../search";
+import { DeleteNotice } from "./delete-notice";
+import { HistoryEmpty } from "./history-empty";
+import { HistoryMonth } from "./history-month";
+import { HistorySearch } from "./history-search";
 
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** Every saved briefing, newest first, grouped by month and searchable. */
 export function HistoryList() {
-  const days = useLiveQuery(async () => {
-    const news = await db.news.orderBy("date").reverse().toArray();
-    return news.map((n) => ({
-      date: n.date,
-      count: n.items.length,
-      mode: n.mode,
-      lead: n.items[0]?.title,
-    }));
-  });
+  const days = useLiveQuery(() => db.news.orderBy("date").reverse().toArray());
+  const config = useConfig();
+  const [query, setQuery] = useState("");
+  const [deleted, setDeleted] = useState<StoredNews | null>(null);
 
-  if (!days) return <p className="text-muted">Loading…</p>;
+  const deferredQuery = useDeferredValue(query);
+  const terms = useMemo(() => queryTerms(deferredQuery), [deferredQuery]);
+  const results = useMemo(() => searchDays(days ?? [], terms), [days, terms]);
+  const months = useMemo(() => groupByMonth(results), [results]);
+
+  const remove = useCallback(async (day: StoredNews) => {
+    await db.news.delete(day.date);
+    setDeleted(day);
+  }, []);
+  const undo = useCallback(async () => {
+    if (!deleted) return;
+    await db.news.put(deleted);
+    setDeleted(null);
+  }, [deleted]);
+  const dismiss = useCallback(() => setDeleted(null), []);
+
+  if (!days) return <div className="min-h-64" aria-busy="true" />;
+
+  const notice = deleted && <DeleteNotice date={deleted.date} onUndo={() => void undo()} onDismiss={dismiss} />;
   if (days.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-line px-6 py-12 text-center">
-        <Newspaper size={28} className="mx-auto text-muted" />
-        <p className="mt-4 font-medium">No briefings yet</p>
-        <p className="mt-1 text-sm text-muted">Each day you fetch news is saved here so you can replay it.</p>
-        <Link href="/standup" className={`${primaryButton} mt-6`}>
-          Go to today
-        </Link>
-      </div>
+      <>
+        <HistoryEmpty />
+        {notice}
+      </>
     );
   }
 
-  async function remove(date: string) {
-    if (confirm(`Delete the saved news for ${formatDayShort(date)}?`)) await db.news.delete(date);
-  }
+  const storyTotal = days.reduce((n, d) => n + d.items.length, 0);
+  const matchTotal = results.reduce((n, d) => n + d.matches.length, 0);
+  const status = terms.length
+    ? matchTotal
+      ? `${plural(matchTotal, "story", "stories")} on ${plural(results.length, "day", "days")} match “${query.trim()}”.`
+      : `No saved stories mention “${query.trim()}”.`
+    : `${plural(days.length, "briefing", "briefings")} and ${plural(storyTotal, "story", "stories")} saved in this browser.`;
 
   return (
-    <ul className="divide-y divide-line border-y border-line">
-      {days.map((day) => (
-        <li key={day.date} className="flex items-center gap-2">
-          <Link
-            href={`/standup?date=${day.date}`}
-            className="group flex flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-4"
-          >
-            <span className="inline-flex items-center gap-2 font-serif text-xl group-hover:text-accent">
-              {formatDayShort(day.date)}
-              <ArrowRight size={16} className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
-            </span>
-            <span className="text-sm text-muted tabular-nums">
-              {day.count} stories
-              {day.mode === "fallback" && " · feed snippets"}
-            </span>
-            {day.lead && <span className="w-full truncate text-sm text-muted">Lead: {day.lead}</span>}
-          </Link>
-          <button
-            type="button"
-            onClick={() => void remove(day.date)}
-            className={`${quietButton} gap-1.5 hover:text-accent`}
-            aria-label={`Delete ${formatDayShort(day.date)}`}
-          >
-            <Trash size={16} />
-            <span className="hidden sm:inline">Delete</span>
-          </button>
-        </li>
-      ))}
-    </ul>
+    <>
+      <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p data-testid="search-status" aria-live="polite" className="text-muted">
+          {status}
+        </p>
+        <HistorySearch value={query} onChange={setQuery} />
+      </div>
+
+      <div className="mt-12">
+        {months.length > 0 ? (
+          months.map((group) => (
+            <HistoryMonth
+              key={group.key}
+              group={group}
+              terms={terms}
+              company={config?.brief.company ?? ""}
+              onDelete={(day) => void remove(day)}
+            />
+          ))
+        ) : (
+          <div className="max-w-md">
+            <p className="text-muted">
+              Search looks through headlines, sources, summaries and “why it matters”. Try a company, regulation or
+              place name.
+            </p>
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="mt-4 inline-flex min-h-11 items-center text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+      </div>
+
+      {notice}
+    </>
   );
 }

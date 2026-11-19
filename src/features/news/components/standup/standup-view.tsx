@@ -11,8 +11,11 @@ import { StandupDay } from "./standup-day";
 export function StandupView() {
   const config = useConfig();
   const today = useToday(config?.timeZone);
-  const param = useSearchParams().get("date");
+  const params = useSearchParams();
+  const param = params.get("date");
+  // ?story=3 opens the slides at that story (links from History).
+  const story = Number(params.get("story")) || 0;
   if (!today || !config) return <BlankScreen />;
   const date = isDateKey(param) ? param : today;
-  return <StandupDay key={date} date={date} isToday={date === today} config={config} />;
+  return <StandupDay key={date} date={date} isToday={date === today} config={config} startAt={story} />;
 }

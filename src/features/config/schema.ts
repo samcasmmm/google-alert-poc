@@ -84,6 +84,8 @@ export const AppConfigSchema = z.object({
   /** Empty = DEFAULT_MODEL, so changing the default reaches existing users */
   groqModel: z.string().default(""),
   feeds: z.array(z.string()).default([]),
+  /** Optional display names for feeds, keyed by URL ("CBAM", "EUDR"). Shown only in Settings. */
+  feedLabels: z.record(z.string(), z.string()).catch({}).default({}),
   brief: BriefSchema.default(BriefSchema.parse({})),
   maxItems: storyCount.default(DEFAULT_MAX_ITEMS),
   /** IANA zone that defines "today"; empty = this browser's zone */

@@ -64,6 +64,18 @@ export function formatDayShort(key: string): string {
   }).format(keyToDate(key));
 }
 
+/** "Thu 19" */
+export function formatWeekdayDay(key: string): string {
+  return `${weekdayName(key).slice(0, 3)} ${Number(key.slice(8, 10))}`;
+}
+
+/** "November 2026" from a "YYYY-MM" or "YYYY-MM-DD" key. */
+export function formatMonth(key: string): string {
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(
+    new Date(`${key.slice(0, 7)}-15T12:00:00Z`),
+  );
+}
+
 /** Article timestamp in the viewer's local time. */
 export function formatTimestamp(iso: string): string {
   const d = new Date(iso);

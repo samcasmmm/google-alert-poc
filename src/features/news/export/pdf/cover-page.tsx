@@ -8,7 +8,10 @@ import { COLOR, MARGIN, PAGE_SIZE } from "./theme";
 /** Masthead, the date as the hero, and a contents list that links to each story page. */
 export function CoverPage({ news, company }: { news: DailyNews; company: string }) {
   const year = formatDateKey(news.date, { year: "numeric" });
-  const snippets = news.mode === "fallback" ? " from feed snippets" : "";
+  const ranking =
+    news.mode === "fallback"
+      ? "from feed snippets"
+      : `ranked by relevance${company ? ` to ${company}` : ""}`;
 
   return (
     <Page size={PAGE_SIZE} style={[styles.page, { padding: MARGIN, paddingBottom: 40 }]}>
@@ -20,7 +23,7 @@ export function CoverPage({ news, company }: { news: DailyNews; company: string 
       <View style={{ flexGrow: 1, justifyContent: "center" }}>
         <Text style={styles.weekday}>{formatDateKey(news.date, { weekday: "long" })}</Text>
         <Text style={styles.bigDate}>{formatDateKey(news.date, { month: "long", day: "numeric" })}</Text>
-        <Text style={[styles.small, { marginTop: 10 }]}>{`${year}, ${storyCount(news.items.length)}${snippets}`}</Text>
+        <Text style={[styles.small, { marginTop: 10 }]}>{`${year} edition. ${storyCount(news.items.length)} ${ranking}.`}</Text>
       </View>
 
       <View style={styles.list}>

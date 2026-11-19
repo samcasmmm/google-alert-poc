@@ -90,6 +90,12 @@ export const Presentation = (p: IconProps) => (
     <path d="M3 4h18M5 4v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4M12 16v4M8 20h8" />
   </Icon>
 );
+export const Search = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </Icon>
+);
 export const Upload = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 20V9M7 14l5-5 5 5M5 4h14" />
