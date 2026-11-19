@@ -3,7 +3,17 @@ import { z } from "zod";
 export const DEFAULT_MODEL = "openai/gpt-oss-120b";
 /** Shown as suggestions in settings; any model id your key can use works. */
 export const SUGGESTED_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
-export const DEFAULT_MAX_ITEMS = 12;
+/** Stories per briefing: a 5-minute standup fits 6–7. */
+export const MIN_ITEMS = 5;
+export const MAX_ITEMS = 7;
+export const DEFAULT_MAX_ITEMS = 7;
+
+/** Older saved configs allowed up to 20; clamp instead of rejecting the whole config. */
+const storyCount = z
+  .number()
+  .int()
+  .catch(DEFAULT_MAX_ITEMS)
+  .transform((n) => Math.min(MAX_ITEMS, Math.max(MIN_ITEMS, n)));
 
 /**
  * Company & product context sent to Groq so it can pick relevant stories and
@@ -75,7 +85,7 @@ export const AppConfigSchema = z.object({
   groqModel: z.string().default(""),
   feeds: z.array(z.string()).default([]),
   brief: BriefSchema.default(BriefSchema.parse({})),
-  maxItems: z.number().int().min(5).max(20).default(DEFAULT_MAX_ITEMS),
+  maxItems: storyCount.default(DEFAULT_MAX_ITEMS),
   /** IANA zone that defines "today"; empty = this browser's zone */
   timeZone: z.string().default(""),
   slideLayout: z.enum(["editorial", "poster", "briefing"]).catch("editorial").default("editorial"),
@@ -125,7 +135,7 @@ export const NewsRequestSchema = z.object({
       priorities: briefText(600),
     })
     .optional(),
-  maxItems: z.number().int().min(5).max(20).optional(),
+  maxItems: storyCount.optional(),
 });
 
 export type NewsRequest = z.input<typeof NewsRequestSchema>;

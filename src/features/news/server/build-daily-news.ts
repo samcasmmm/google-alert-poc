@@ -15,7 +15,7 @@ export async function buildDailyNews(req: NewsRequest): Promise<DailyNews> {
   if (raw.length === 0) return { ...base, mode: "fallback", items: [], note: "No items in the feeds for this period." };
 
   if (!req.groqApiKey) {
-    return { ...base, mode: "fallback", items: fallbackItems(raw), note: "No Groq API key set." };
+    return { ...base, mode: "fallback", items: fallbackItems(raw, req.maxItems), note: "No Groq API key set." };
   }
 
   try {
@@ -29,6 +29,6 @@ export async function buildDailyNews(req: NewsRequest): Promise<DailyNews> {
   } catch (error) {
     console.error("[news] Groq ranking failed, using fallback", error);
     const message = error instanceof Error ? error.message : String(error);
-    return { ...base, mode: "fallback", items: fallbackItems(raw), note: `Groq failed: ${message.slice(0, 200)}` };
+    return { ...base, mode: "fallback", items: fallbackItems(raw, req.maxItems), note: `Groq failed: ${message.slice(0, 200)}` };
   }
 }

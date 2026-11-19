@@ -1,4 +1,5 @@
 import Parser from "rss-parser";
+import { cleanHeadline } from "../headline";
 
 export interface RawItem {
   id: number;
@@ -7,6 +8,8 @@ export interface RawItem {
   source: string;
   publishedAt: string;
   snippet: string;
+  /** Index of the feed URL this item came from (for per-feed limits). */
+  feed: number;
 }
 
 /** Upper bound on candidates sent to the LLM (keeps us inside Groq free-tier TPM). */
@@ -108,29 +111,34 @@ function hostnameOf(url: string): string {
   }
 }
 
-async function fetchFeed(feedUrl: string): Promise<Omit<RawItem, "id">[]> {
+async function fetchFeed(feedUrl: string, feedIndex: number): Promise<Omit<RawItem, "id">[]> {
   const feed = await parser.parseURL(feedUrl);
   const feedTitle = cleanText(feed.title);
   const isGoogleAlert = /^google alert/i.test(feedTitle);
 
   return feed.items.flatMap((item) => {
     const url = unwrapUrl(item.link ?? "");
-    const title = cleanText(item.title);
+    const rawTitle = cleanText(item.title);
+    const title = isGoogleAlert ? cleanHeadline(rawTitle) : rawTitle;
     const time = Date.parse(item.isoDate ?? item.pubDate ?? "");
     if (!url || !title || Number.isNaN(time)) return [];
 
     const source = isGoogleAlert ? hostnameOf(url) : feedTitle || hostnameOf(url);
     const snippet = cleanText(item.contentSnippet ?? item.content ?? item.summary).slice(0, SNIPPET_CHARS);
-    return [{ title, url, source, publishedAt: new Date(time).toISOString(), snippet }];
+    return [{ title, url, source, publishedAt: new Date(time).toISOString(), snippet, feed: feedIndex }];
   });
 }
 
-/** Fetch every feed, keep items newer than `sinceMs`, dedupe, newest first. */
+/**
+ * Fetch every feed, keep items newer than `sinceMs` and dedupe across feeds.
+ * Candidates are interleaved feed by feed (newest first within each feed), so one
+ * busy feed can't crowd the others out of the candidate pool.
+ */
 export async function fetchRecentItems(feedUrls: string[], sinceMs: number): Promise<RawItem[]> {
   const urls = [...new Set(feedUrls.map((u) => u.trim()))].filter(isAllowedFeedUrl);
   if (urls.length === 0) throw new Error("No valid RSS feed URLs configured");
 
-  const results = await Promise.allSettled(urls.map(fetchFeed));
+  const results = await Promise.allSettled(urls.map((url, i) => fetchFeed(url, i)));
   const all: Omit<RawItem, "id">[] = [];
   results.forEach((result, i) => {
     if (result.status === "fulfilled") all.push(...result.value);
@@ -142,7 +150,7 @@ export async function fetchRecentItems(feedUrls: string[], sinceMs: number): Pro
 
   const seenUrls = new Set<string>();
   const seenTitles = new Set<string>();
-  const items: RawItem[] = [];
+  const byFeed = new Map<number, Omit<RawItem, "id">[]>();
 
   for (const item of all
     .filter((it) => Date.parse(it.publishedAt) >= sinceMs)
@@ -152,8 +160,20 @@ export async function fetchRecentItems(feedUrls: string[], sinceMs: number): Pro
     if (seenUrls.has(urlKey) || (titleKey && seenTitles.has(titleKey))) continue;
     seenUrls.add(urlKey);
     if (titleKey) seenTitles.add(titleKey);
-    items.push({ ...item, id: items.length });
-    if (items.length >= MAX_CANDIDATES) break;
+    const group = byFeed.get(item.feed) ?? [];
+    group.push(item);
+    byFeed.set(item.feed, group);
+  }
+
+  const items: RawItem[] = [];
+  const groups = [...byFeed.values()];
+  for (let round = 0; items.length < MAX_CANDIDATES; round++) {
+    const batch = groups.flatMap((group) => (round < group.length ? [group[round]] : []));
+    if (batch.length === 0) break;
+    for (const item of batch) {
+      if (items.length >= MAX_CANDIDATES) break;
+      items.push({ ...item, id: items.length });
+    }
   }
   return items;
 }

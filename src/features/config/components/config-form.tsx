@@ -9,6 +9,8 @@ import {
   BRIEF_FIELDS,
   briefFilledCount,
   DEFAULT_MODEL,
+  MAX_ITEMS,
+  MIN_ITEMS,
   isHttpUrl,
   SLIDE_LAYOUT_OPTIONS,
   SUGGESTED_MODELS,
@@ -215,14 +217,20 @@ function ConfigFormInner({ initial }: { initial: AppConfig }) {
           </span>
         </summary>
       <div className="grid gap-6 pt-2 sm:grid-cols-3">
-        <Field label="Stories per day" htmlFor="cfg-max">
+        <Field
+          label="Stories per day"
+          hint={`${MIN_ITEMS}–${MAX_ITEMS}. With several feeds, each gives its top 2–3.`}
+          htmlFor="cfg-max"
+        >
           <input
             id="cfg-max"
             type="number"
-            min={5}
-            max={20}
+            min={MIN_ITEMS}
+            max={MAX_ITEMS}
             value={maxItems}
-            onChange={(e) => setMaxItems(Math.min(20, Math.max(5, Number(e.target.value) || 5)))}
+            onChange={(e) =>
+              setMaxItems(Math.min(MAX_ITEMS, Math.max(MIN_ITEMS, Number(e.target.value) || MIN_ITEMS)))
+            }
             className={inputClass}
           />
         </Field>

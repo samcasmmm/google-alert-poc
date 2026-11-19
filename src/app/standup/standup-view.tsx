@@ -4,12 +4,13 @@ import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AppNav } from "@/components/app-nav";
 import { ArrowRight, Refresh, Spinner } from "@/components/icons";
 import { after, RevealText } from "@/components/reveal-text";
+import { SiteHeader } from "@/components/site-header";
 import { primaryButton, quietButton, secondaryButton } from "@/components/ui";
 import { useConfig } from "@/features/config/config";
 import type { AppConfig } from "@/features/config/schema";
+import { ExportMenu } from "@/features/news/components/export-menu";
 import { RestartButton, SlideDeck } from "@/features/news/components/slide-deck";
 import { SLIDE_LAYOUTS } from "@/features/news/components/slide-layouts";
 import { useDailyNews } from "@/features/news/use-daily-news";
@@ -87,7 +88,9 @@ function Standup({ date, isToday, config }: { date: string; isToday: boolean; co
     <layout.End key="end" links={links} />
   ];
 
-  return <SlideDeck slides={slides} />;
+  return (
+    <SlideDeck slides={slides} actions={<ExportMenu news={news} company={config.brief.company} />} />
+  );
 }
 
 /* ───────────── Today, before fetching: the one primary action ───────────── */
@@ -109,11 +112,7 @@ function TodayLanding({
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-line">
-        <div className="mx-auto w-full max-w-6xl px-4 py-2 sm:px-8">
-          <AppNav />
-        </div>
-      </header>
+      <SiteHeader />
 
       <main
         id="main"
@@ -214,11 +213,7 @@ function FetchProgress() {
 function EmptyDay({ date }: { date: string }) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-line">
-        <div className="mx-auto w-full max-w-6xl px-4 py-2 sm:px-8">
-          <AppNav />
-        </div>
-      </header>
+      <SiteHeader />
       <main id="main" className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-16">
         <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">{formatDayLong(date)}</p>
         <h1 className="mt-3 font-serif text-4xl font-medium tracking-tight">No briefing saved for this day.</h1>

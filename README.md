@@ -1,6 +1,6 @@
 # Standup News
 
-Shows 10–20 daily product and industry news stories as full-screen slides for a 5-minute standup, each with a "why it matters" line written for your company.
+Shows 6–7 daily product and industry news stories as full-screen slides for a 5-minute standup, each with a "why it matters" line written for your company.
 
 - **News:** your RSS feeds (Google Alerts plus industry blogs). Groq is used only for text: it picks the top stories and writes a 2-line summary and a "why it matters" line for each. All slide layouts and styling are plain code (light theme, Tailwind).
 - **Storage:** everything (settings, company brief, past days) is kept in **your browser's IndexedDB**. There is no database, no login, and the app needs no environment variables.
@@ -21,8 +21,8 @@ Open http://localhost:3000/settings and fill in:
 | **Company & product brief** | Company name, what you build, customers & market, competitors, current priorities. All optional, but this is what makes "why it matters" specific to you instead of generic. |
 | Presentation layout | **Editorial** (serif, newspaper front page), **Poster** (oversized type, giant story number) or **Briefing** (two-column grid). Every layout shows the same content. |
 | **RSS feeds** | One URL per line (see [Google Alerts RSS](#google-alerts-rss) below). Required. |
-| **Groq API key** | Free at https://console.groq.com/keys. Optional: without a key you get the latest 15 stories with feed snippets instead of AI summaries. |
-| Stories per day | 5–20, default 12. Around 12 fits comfortably in 5 minutes. |
+| **Groq API key** | Free at https://console.groq.com/keys. Optional: without a key you get the latest stories (same per-feed limits) with feed snippets instead of AI summaries. |
+| Stories per day | 5–7, default 7. With 2+ feeds, each feed contributes only its top 2–3 most relevant stories (3 each for 2–3 feeds, 2 each for 4+), so no single feed dominates. |
 | Groq model | Default `openai/gpt-oss-120b`. Any model your key can use. |
 | Time zone | Decides when "today" starts. Empty = this browser's time zone. |
 
@@ -33,9 +33,9 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
 - **`/standup`** (**Today**): a title slide (date and who the briefing is prepared for), one slide per story, then an end slide.
   - `→` / `Space` / clicking the right side goes forward. `←` / clicking the left side goes back.
   - `F` toggles fullscreen.
-  - The 5-minute timer starts on the first slide change. `P` pauses it and `R` resets it.
   - **Fetch again** on the title slide fetches today's news again.
 - **`/history`**: past days saved in this browser. Click one to replay its slides.
+- **Export (slide deck header):** **PDF** opens the print dialog with a colour 16:9 PDF: cover with contents, one page per story, and a closing page with all source links (pick "Save as PDF"; Ctrl/Cmd+P works too). **PowerPoint** downloads an editable `.pptx` with the summary and link in the speaker notes.
 - **`/settings`**: company brief, news sources, slide layout, advanced options, and Export/Import of all data as JSON.
 
 ### How news is fetched
@@ -43,7 +43,7 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
 2. If it's missing, you see today's date, your company brief and a **Fetch today's news** button. Clicking it POSTs your saved settings to `/api/news`. **Fetch again** on the title slide replaces the day's stories.
 3. The server reads the feeds and keeps items from the last 24h (72h on Mondays, to cover the weekend).
 4. It removes duplicates by URL and by normalized title, and turns Google Alerts redirect links back into the real URLs.
-5. Groq ranks the stories by relevance to your company brief and writes the summary and "why it matters" lines. The model only returns item ids and text; titles and links come straight from the feeds.
+5. Groq ranks the stories by relevance to your company brief, keeping at most 2–3 per feed (also enforced in code), and writes the summary and "why it matters" lines. The model only returns item ids and text; titles and links come straight from the feeds.
 6. The browser saves the result for the day, so each browser fetches at most once a day.
 7. If Groq fails, you get the latest items with their feed snippets instead. Click **Fetch again** to retry.
 

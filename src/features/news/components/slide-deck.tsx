@@ -1,14 +1,13 @@
 "use client";
 
 import { createContext, use, useCallback, useEffect, useState, type ReactNode } from "react";
-import { AppNav } from "@/components/app-nav";
 import { ArrowLeft, ArrowRight, Expand, Restart } from "@/components/icons";
+import { SiteHeader } from "@/components/site-header";
 import { primaryButton } from "@/components/ui";
-import { Countdown } from "./countdown";
 
 const DeckContext = createContext<(() => void) | null>(null);
 
-/** "Start over" for the end slide: jumps to the first slide and resets the timer. */
+/** "Start over" for the end slide: jumps back to the first slide. */
 export function RestartButton() {
   const restart = use(DeckContext);
   if (!restart) return null;
@@ -20,8 +19,6 @@ export function RestartButton() {
   );
 }
 
-const STANDUP_SECONDS = 5 * 60;
-
 function isInteractive(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && !!target.closest("a, button, input, textarea, select");
 }
@@ -31,14 +28,18 @@ const iconButton =
 
 /**
  * Full-screen slides. → / Space / click right two-thirds = next, ← / click left third = previous,
- * F = fullscreen, P = pause timer, R = reset timer. The timer starts on the first advance.
+ * Home / End = first / last, F = fullscreen.
  */
-export function SlideDeck({ slides }: { slides: ReactNode[] }) {
+export function SlideDeck({
+  slides,
+  actions,
+}: {
+  slides: ReactNode[];
+  /** extra header controls, e.g. export */
+  actions?: ReactNode;
+}) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timerStarted, setTimerStarted] = useState(false);
-  const [timerKey, setTimerKey] = useState(0);
   const last = slides.length - 1;
 
   const go = useCallback(
@@ -48,36 +49,19 @@ export function SlideDeck({ slides }: { slides: ReactNode[] }) {
       if (next === index) return;
       setDirection(next > index ? "next" : "prev");
       setIndex(next);
-      if (!timerStarted && next > index) {
-        setTimerStarted(true);
-        setTimerRunning(true);
-      }
     },
-    [index, last, timerStarted],
+    [index, last],
   );
-
-  const toggleTimer = useCallback(() => {
-    setTimerStarted(true);
-    setTimerRunning((r) => !r);
-  }, []);
-
-  const resetTimer = useCallback(() => {
-    setTimerKey((k) => k + 1);
-    setTimerRunning(false);
-    setTimerStarted(false);
-  }, []);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void document.documentElement.requestFullscreen?.();
   }, []);
 
-  /** Back to the title slide with a fresh timer (it starts again on the next advance). */
   const restart = useCallback(() => {
     setDirection("prev");
     setIndex(0);
-    resetTimer();
-  }, [resetTimer]);
+  }, []);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -109,19 +93,11 @@ export function SlideDeck({ slides }: { slides: ReactNode[] }) {
         case "F":
           toggleFullscreen();
           break;
-        case "p":
-        case "P":
-          toggleTimer();
-          break;
-        case "r":
-        case "R":
-          resetTimer();
-          break;
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go, resetTimer, toggleFullscreen, toggleTimer]);
+  }, [go, toggleFullscreen]);
 
   function onClick(e: React.MouseEvent<HTMLElement>) {
     if (isInteractive(e.target)) return;
@@ -132,68 +108,69 @@ export function SlideDeck({ slides }: { slides: ReactNode[] }) {
 
   return (
     <DeckContext value={restart}>
-    <div className="fixed inset-0 flex flex-col overflow-hidden bg-paper text-ink">
-      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-1 sm:px-8">
-        <AppNav />
-        <div className="flex items-center gap-2">
-          <Countdown key={timerKey} seconds={STANDUP_SECONDS} running={timerRunning} onToggle={toggleTimer} />
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className={`${iconButton} hidden border-transparent sm:inline-flex`}
-            aria-label="Toggle fullscreen (F)"
-            title="Fullscreen (F)"
-          >
-            <Expand />
-          </button>
-        </div>
-      </header>
+      <div className="fixed inset-0 flex flex-col overflow-hidden bg-paper text-ink">
+        <SiteHeader
+          actions={
+            <>
+              {actions}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className={`${iconButton} hidden border-transparent sm:inline-flex`}
+                aria-label="Toggle fullscreen (F)"
+                title="Fullscreen (F)"
+              >
+                <Expand />
+              </button>
+            </>
+          }
+        />
 
-      <main
-        id="main"
-        onClick={onClick}
-        className="relative flex-1 cursor-pointer overflow-x-hidden overflow-y-auto overscroll-contain"
-        aria-roledescription="carousel"
-        aria-label="Today's briefing"
-      >
-        <div
-          key={index}
-          role="group"
-          aria-roledescription="slide"
-          aria-label={`${index + 1} of ${slides.length}`}
-          className={`flex min-h-full w-full flex-col justify-center px-4 py-10 sm:px-12 lg:px-20 ${
-            direction === "next" ? "motion-safe:animate-slide-next" : "motion-safe:animate-slide-prev"
-          }`}
-        >
-          {slides[index]}
-        </div>
-      </main>
-
-      <footer className="flex items-center gap-3 px-4 pt-2 pb-4 sm:gap-4 sm:px-8 sm:pb-6">
-        <button type="button" onClick={() => go(-1)} disabled={index === 0} className={iconButton} aria-label="Previous slide">
-          <ArrowLeft />
-        </button>
-        <div
-          className="h-0.5 flex-1 overflow-hidden rounded-full bg-line"
-          role="progressbar"
-          aria-label="Briefing progress"
-          aria-valuemin={1}
-          aria-valuemax={slides.length}
-          aria-valuenow={index + 1}
+        <main
+          id="main"
+          onClick={onClick}
+          className="relative flex-1 cursor-pointer overflow-x-hidden overflow-y-auto overscroll-contain"
+          aria-roledescription="carousel"
+          aria-label="Today's briefing"
         >
           <div
-            className="h-full origin-left rounded-full bg-accent transition-transform duration-500 ease-arrive"
-            style={{ transform: `scaleX(${slides.length > 1 ? index / last : 1})` }}
-          />
-        </div>
-        <span className="min-w-12 text-right font-mono text-xs text-muted tabular-nums" aria-live="polite">
-          {index + 1}/{slides.length}
-        </span>
-        <button type="button" onClick={() => go(1)} disabled={index === last} className={iconButton} aria-label="Next slide">
-          <ArrowRight />
-        </button>
-      </footer>
-    </div>
+            key={index}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${index + 1} of ${slides.length}`}
+            className={`flex min-h-full w-full flex-col justify-center px-4 py-10 sm:px-12 lg:px-20 ${
+              direction === "next" ? "motion-safe:animate-slide-next" : "motion-safe:animate-slide-prev"
+            }`}
+          >
+            {slides[index]}
+          </div>
+        </main>
+
+        <footer className="flex items-center gap-3 px-4 pt-2 pb-4 sm:gap-4 sm:px-8 sm:pb-6">
+          <button type="button" onClick={() => go(-1)} disabled={index === 0} className={iconButton} aria-label="Previous slide">
+            <ArrowLeft />
+          </button>
+          <div
+            className="h-0.5 flex-1 overflow-hidden rounded-full bg-line"
+            role="progressbar"
+            aria-label="Briefing progress"
+            aria-valuemin={1}
+            aria-valuemax={slides.length}
+            aria-valuenow={index + 1}
+          >
+            <div
+              className="h-full origin-left rounded-full bg-accent transition-transform duration-500 ease-arrive"
+              style={{ transform: `scaleX(${slides.length > 1 ? index / last : 1})` }}
+            />
+          </div>
+          <span className="min-w-12 text-right font-mono text-xs text-muted tabular-nums" aria-live="polite">
+            {index + 1}/{slides.length}
+          </span>
+          <button type="button" onClick={() => go(1)} disabled={index === last} className={iconButton} aria-label="Next slide">
+            <ArrowRight />
+          </button>
+        </footer>
+      </div>
     </DeckContext>
   );
 }

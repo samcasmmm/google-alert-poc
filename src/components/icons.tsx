@@ -75,6 +75,21 @@ export const Download = (p: IconProps) => (
     <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
   </Icon>
 );
+export const ChevronDown = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Icon>
+);
+export const FileText = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4" />
+  </Icon>
+);
+export const Presentation = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 4h18M5 4v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4M12 16v4M8 20h8" />
+  </Icon>
+);
 export const Upload = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 20V9M7 14l5-5 5 5M5 4h14" />
