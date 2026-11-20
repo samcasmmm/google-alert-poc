@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
-import { Download, Spinner, Trash } from "@/components/icons";
+import { Trash } from "@/components/icons";
 import { quietButton } from "@/components/ui";
-import { exportPdf } from "@/features/news/export/pdf/export-pdf";
+import { ExportMenu } from "@/features/news/components/export-menu";
 import type { StoredNews } from "@/lib/db";
 import { formatDayLong, formatWeekdayDay } from "@/lib/date";
 import { HistoryStory } from "./history-story";
@@ -30,8 +30,6 @@ export function HistoryDay({
   onDelete: (day: StoredNews) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const titleId = useId();
   const listId = useId();
 
@@ -39,19 +37,6 @@ export function HistoryDay({
   const visible = searching || expanded ? matches : matches.slice(0, PREVIEW);
   const hidden = matches.length - visible.length;
   const longDate = formatDayLong(day.date);
-
-  async function downloadPdf() {
-    setExporting(true);
-    setError(null);
-    try {
-      await exportPdf(day, company);
-    } catch (e) {
-      console.error("[history] pdf export", e);
-      setError("Couldn’t create the PDF. Try again.");
-    } finally {
-      setExporting(false);
-    }
-  }
 
   return (
     <article aria-labelledby={titleId} className="grid gap-x-10 gap-y-3 py-7 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
@@ -87,20 +72,11 @@ export function HistoryDay({
           </button>
         )}
 
-        <div className="-ml-3 mt-2 flex flex-wrap items-center gap-1">
+        <div className="-ml-3 mt-3 flex flex-wrap items-center gap-2">
           <Link href={`/standup?date=${day.date}`} className={`${quietButton} font-medium text-ink`}>
             Open slides
           </Link>
-          <button
-            type="button"
-            onClick={() => void downloadPdf()}
-            disabled={exporting}
-            className={`${quietButton} gap-1.5 disabled:cursor-progress`}
-            aria-label={`Download PDF of ${longDate}`}
-          >
-            {exporting ? <Spinner size={15} /> : <Download size={15} />}
-            {exporting ? "Creating PDF…" : "Download PDF"}
-          </button>
+          <ExportMenu news={day} company={company} label="Download" align="start" />
           <button
             type="button"
             onClick={() => onDelete(day)}
@@ -110,11 +86,6 @@ export function HistoryDay({
             <Trash size={15} />
             Delete
           </button>
-          {error && (
-            <p role="alert" className="ml-3 text-sm text-accent">
-              {error}
-            </p>
-          )}
         </div>
       </div>
     </article>

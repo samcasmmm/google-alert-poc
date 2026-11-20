@@ -1,5 +1,5 @@
 import { StyleSheet } from "@react-pdf/renderer";
-import { COLOR, MARGIN, PAGE, PANEL_WIDTH } from "./theme";
+import { COLOR, MARGIN, PAGE, PANEL_WIDTH } from "../shared/theme";
 
 // Design: quiet white pages in Newsreader + Geist, with one bold element, the
 // full-height vermilion "why it matters" panel. That line is the company-specific

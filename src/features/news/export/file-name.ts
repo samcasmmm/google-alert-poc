@@ -1,8 +1,8 @@
 import type { DailyNews } from "../schema";
 
-/** "standup-news-2026-11-19.pdf" */
-export function exportFileName(news: DailyNews, ext: "pdf" | "pptx"): string {
-  return `standup-news-${news.date}.${ext}`;
+/** "standup-news-2026-11-19.pptx", or with a format: "standup-news-2026-11-19-memo.pdf" */
+export function exportFileName(news: DailyNews, ext: "pdf" | "pptx", variant?: string): string {
+  return `standup-news-${news.date}${variant ? `-${variant}` : ""}.${ext}`;
 }
 
 /** Saves a generated file through a temporary download link. */

@@ -1,11 +1,11 @@
 import { Link, Page, Text, View } from "@react-pdf/renderer";
 import { formatTimestamp } from "@/lib/date";
-import { cleanHeadline } from "../../headline";
-import type { NewsItem } from "../../schema";
-import { headlineSize, quoteSize, shortUrl } from "./format";
+import { cleanHeadline } from "../../../headline";
+import type { NewsItem } from "../../../schema";
+import { headlineSize, quoteSize, shortUrl } from "../shared/format";
 import { PageFooter } from "./page-footer";
 import { styles } from "./styles";
-import { PAGE_SIZE } from "./theme";
+import { PAGE_SIZE } from "../shared/theme";
 
 interface StoryPageProps {
   item: NewsItem;

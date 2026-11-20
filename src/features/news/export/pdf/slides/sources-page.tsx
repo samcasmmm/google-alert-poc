@@ -1,10 +1,10 @@
 import { Link, Page, Text, View } from "@react-pdf/renderer";
-import { cleanHeadline } from "../../headline";
-import type { DailyNews } from "../../schema";
-import { shortUrl } from "./format";
+import { cleanHeadline } from "../../../headline";
+import type { DailyNews } from "../../../schema";
+import { shortUrl } from "../shared/format";
 import { PageFooter } from "./page-footer";
 import { styles } from "./styles";
-import { MARGIN, PAGE_SIZE } from "./theme";
+import { MARGIN, PAGE_SIZE } from "../shared/theme";
 
 /** Closing page: every story's source with a clickable link. */
 export function SourcesPage({ news, company, page }: { news: DailyNews; company: string; page: number }) {

@@ -1,16 +1,30 @@
+import type { DocumentProps } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import type { DailyNews } from "../../schema";
 import { downloadBlob, exportFileName } from "../file-name";
+import type { PdfFormat } from "./formats";
+
+/** Loads only the chosen format's code, then builds its <Document>. */
+async function buildDocument(format: PdfFormat, news: DailyNews, company: string): Promise<ReactElement<DocumentProps>> {
+  switch (format) {
+    case "slides":
+      return (await import("./slides/slides-document")).buildSlidesDocument(news, company);
+    case "poster":
+      return (await import("./poster/poster-document")).buildPosterDocument(news, company);
+    case "memo":
+      return (await import("./memo/memo-document")).buildMemoDocument(news, company);
+    case "digest":
+      return (await import("./digest/digest-document")).buildDigestDocument(news, company);
+  }
+}
 
 /**
- * Builds the 16:9 PDF in the browser and downloads it: no print dialog, so paper
- * size, margins and "background graphics" settings can't change how it looks.
+ * Builds the PDF in the browser and downloads it: no print dialog, so paper size,
+ * margins and "background graphics" settings can't change how it looks.
  * The renderer (~0.5MB) loads only when someone exports.
  */
-export async function exportPdf(news: DailyNews, company: string): Promise<void> {
-  const [{ pdf }, { buildBriefingDocument }] = await Promise.all([
-    import("@react-pdf/renderer"),
-    import("./briefing-document"),
-  ]);
-  const blob = await pdf(buildBriefingDocument(news, company)).toBlob();
-  downloadBlob(blob, exportFileName(news, "pdf"));
+export async function exportPdf(news: DailyNews, company: string, format: PdfFormat = "slides"): Promise<void> {
+  const [{ pdf }, doc] = await Promise.all([import("@react-pdf/renderer"), buildDocument(format, news, company)]);
+  const blob = await pdf(doc).toBlob();
+  downloadBlob(blob, exportFileName(news, "pdf", format));
 }

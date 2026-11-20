@@ -1,17 +1,17 @@
 import { Document, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import type { DailyNews } from "../../schema";
+import type { DailyNews } from "../../../schema";
 import { CoverPage } from "./cover-page";
-import { registerPdfFonts } from "./fonts";
-import { formatDateKey } from "./format";
+import { registerPdfFonts } from "../shared/fonts";
+import { formatDateKey } from "../shared/format";
 import { SourcesPage } from "./sources-page";
 import { StoryPage } from "./story-page";
 
 /**
- * The whole briefing as a react-pdf <Document>: cover, one page per story, sources.
+ * Slides format (16:9): cover, one page per story with the "why it matters" panel, sources.
  * Returns the element itself because react-pdf's `pdf()` needs a <Document> at the root.
  */
-export function buildBriefingDocument(news: DailyNews, company: string): ReactElement<DocumentProps> {
+export function buildSlidesDocument(news: DailyNews, company: string): ReactElement<DocumentProps> {
   registerPdfFonts();
   const who = company.trim();
   const total = news.items.length;

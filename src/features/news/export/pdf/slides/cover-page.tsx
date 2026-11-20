@@ -1,9 +1,9 @@
 import { Link, Page, Text, View } from "@react-pdf/renderer";
-import { cleanHeadline } from "../../headline";
-import type { DailyNews } from "../../schema";
-import { formatDateKey, storyCount } from "./format";
+import { cleanHeadline } from "../../../headline";
+import type { DailyNews } from "../../../schema";
+import { formatDateKey, storyCount } from "../shared/format";
 import { styles } from "./styles";
-import { COLOR, MARGIN, PAGE_SIZE } from "./theme";
+import { COLOR, MARGIN, PAGE_SIZE } from "../shared/theme";
 
 /** Masthead, the date as the hero, and a contents list that links to each story page. */
 export function CoverPage({ news, company }: { news: DailyNews; company: string }) {
