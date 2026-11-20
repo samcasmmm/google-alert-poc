@@ -76,6 +76,26 @@ export function formatMonth(key: string): string {
   );
 }
 
+/** "3 hours ago", "yesterday", "in 2 days" relative to now. */
+export function formatRelative(iso: string, now = Date.now()): string {
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return "";
+  const seconds = Math.round((then - now) / 1000);
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["year", 31536000],
+    ["month", 2592000],
+    ["week", 604800],
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+  ];
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  for (const [unit, size] of units) {
+    if (Math.abs(seconds) >= size) return rtf.format(Math.round(seconds / size), unit);
+  }
+  return "just now";
+}
+
 /** Article timestamp in the viewer's local time. */
 export function formatTimestamp(iso: string): string {
   const d = new Date(iso);

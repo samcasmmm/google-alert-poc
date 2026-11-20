@@ -41,7 +41,7 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
   - **Memo** (A4): magazine-style reading copy; rank, source and time in a side column, serif headlines, a ruled "why it matters" note; stories never split across pages.
   - **One-page digest** (A4): every story as a ranked row on a single page, headlines linked to the articles.
   - **PowerPoint**: editable `.pptx` with the summary and link in the speaker notes.
-- **`/settings`**: company brief, news sources (named feeds; paste several URLs at once), AI summaries (Groq key and model), briefing options (stories per day, time zone, slide layout) and Backup (download / restore all data as JSON). A save bar appears when there are unsaved changes; `Ctrl/Cmd+S` saves.
+- **`/settings`**: company brief; news sources (each feed is checked when Settings opens: it shows whether it works, how many stories it has and how fresh, and new feeds are named from their own title); AI summaries (the Groq key is checked with Groq, and the model list shows the models that key can use); briefing options (stories per day, time zone, slide layout); and Backup. A save bar appears when there are unsaved changes; `Ctrl/Cmd+S` saves.
 
 ### How news is fetched
 1. On `/standup` (**Today**), the app looks in IndexedDB for today's news. Nothing is fetched automatically.
@@ -60,14 +60,18 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
 src/
   app/                    Routes only (Next.js App Router). Pages stay thin and import from features/.
     api/news/route.ts     POST /api/news: fetch feeds, rank with Groq, return the day's briefing
+    api/feeds/check/      POST: read one feed (title, story count, newest date) for Settings
+    api/groq/check/       POST: verify a Groq key and list the text models it can use
   components/             Shared UI with no feature knowledge: site-header, app-nav, page-shell,
                           blank-screen, reveal-text, searchable-select (the app's dropdown),
                           icons (one icon-set module), ui (class strings)
   features/
     config/               Settings: schema.ts (zod), config.ts (IndexedDB load/save), preset.ts,
-                          draft.ts (form working copy, dirty check, validation)
+                          draft.ts (form working copy, dirty check, validation),
+                          feed-check.ts + use-feed-checks.ts, groq-check.ts + use-groq-key-check.ts
       components/         config-form, config-form-body, settings-nav, save-bar, form-section, form-field,
-                          brief-section, feeds-section, feed-row, add-feeds-field, ai-section, secret-input,
+                          brief-section, feeds-section, feed-row, feed-status, add-feeds-field,
+                          ai-section, ai-status-note, groq-key-field, groq-key-status, secret-input,
                           briefing-section, story-count-picker, time-zone-picker, model-picker,
                           layout-picker, layout-preview, data-section
     history/              search.ts (story search + month grouping)
@@ -77,7 +81,8 @@ src/
       schema.ts           NewsItem / DailyNews types shared by server and browser
       headline.ts         Headline cleanup (drops Google Alerts' " - Publisher" suffix)
       use-daily-news.ts   The day's briefing from IndexedDB + fetchNews()
-      server/             Server-only: feeds.ts (RSS), rank.ts (Groq + per-feed limits), build-daily-news.ts
+      server/             Server-only: feeds.ts (RSS + feed check), rank.ts (Groq + per-feed limits),
+                          groq-models.ts (key check), build-daily-news.ts
       components/
         standup/          The Today page: standup-view, standup-day, today-landing, fetch-progress, empty-day
         deck/             slide-deck, restart-button, deck-context

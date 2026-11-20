@@ -21,7 +21,7 @@ export function FormSection({
       <h2 id={`${id}-title`} className="font-serif text-2xl font-medium tracking-tight sm:text-3xl">
         {title}
       </h2>
-      {description && <p className="mt-2 max-w-prose leading-relaxed text-muted">{description}</p>}
+      {description && <div className="mt-2 max-w-prose leading-relaxed text-muted">{description}</div>}
       <div className="mt-7">{children}</div>
     </section>
   );

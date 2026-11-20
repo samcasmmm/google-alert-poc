@@ -1,9 +1,17 @@
+"use client";
+
+import { DEFAULT_MODEL } from "../schema";
+import { useGroqKeyCheck } from "../use-groq-key-check";
+import { AiStatusNote } from "./ai-status-note";
 import { FormField } from "./form-field";
 import { FormSection } from "./form-section";
+import { GroqKeyField } from "./groq-key-field";
 import { ModelPicker } from "./model-picker";
-import { SecretInput } from "./secret-input";
 
-/** Groq key and model: what writes the summaries and "why it matters" lines. */
+/**
+ * Groq key and model: what ranks the stories and writes the summaries. The key is
+ * checked with Groq, and the model list comes from what that key can actually use.
+ */
 export function AiSection({
   apiKey,
   model,
@@ -13,36 +21,45 @@ export function AiSection({
   model: string;
   onChange: (patch: { groqApiKey?: string; groqModel?: string }) => void;
 }) {
+  const { status, check } = useGroqKeyCheck(apiKey);
+  const hasKey = !!apiKey.trim();
+  const available = status?.state === "ok" ? status.models : undefined;
+  const effective = model.trim() || DEFAULT_MODEL;
+  const unavailable = available && !available.some((m) => m.id === effective);
+
+  const modelHint = unavailable
+    ? model.trim()
+      ? `This key can’t use “${model.trim()}”. Briefings will fall back to the default model; pick one from the list.`
+      : `This key can’t use the default model (${DEFAULT_MODEL}). Pick one from the list.`
+    : available
+      ? "The list shows the text models your key can use."
+      : "Check the key to list the models it can use. You can also type any model id.";
+
   return (
     <FormSection
       id="ai"
       title="AI summaries"
-      description="Groq ranks the stories and writes the summaries. Without a key, slides show the feeds’ own snippets."
+      description={<AiStatusNote hasKey={hasKey} status={status} model={effective} modelUnavailable={!!unavailable} />}
     >
       <div className="space-y-7">
-        <FormField
-          label="Groq API key"
-          htmlFor="cfg-key"
-          hint={
-            <>
-              Free at{" "}
-              <a
-                href="https://console.groq.com/keys"
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-accent underline-offset-4 hover:underline"
-              >
-                console.groq.com/keys
-              </a>
-              . Stored only in this browser and sent only when fetching news.
-            </>
-          }
-        >
-          <SecretInput id="cfg-key" value={apiKey} onChange={(v) => onChange({ groqApiKey: v })} placeholder="gsk_…" />
-        </FormField>
+        <GroqKeyField
+          value={apiKey}
+          status={status}
+          onChange={(v) => onChange({ groqApiKey: v })}
+          onCheck={(key) => check(key)}
+        />
 
-        <FormField label="Model" hint="Pick one, or type any model id your key can use." htmlFor="cfg-model">
-          <ModelPicker id="cfg-model" value={model} onChange={(v) => onChange({ groqModel: v })} />
+        <FormField label="Model" htmlFor="cfg-model">
+          <ModelPicker
+            id="cfg-model"
+            value={model}
+            onChange={(v) => onChange({ groqModel: v })}
+            available={available}
+            describedBy="cfg-model-hint"
+          />
+          <p id="cfg-model-hint" className={`mt-1.5 text-sm ${unavailable ? "text-accent" : "text-muted"}`}>
+            {modelHint}
+          </p>
         </FormField>
       </div>
     </FormSection>

@@ -9,11 +9,15 @@ export function SecretInput({
   value,
   onChange,
   placeholder,
+  onBlur,
+  describedBy,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  onBlur?: () => void;
+  describedBy?: string;
 }) {
   const [visible, setVisible] = useState(false);
   return (
@@ -23,6 +27,8 @@ export function SecretInput({
         type={visible ? "text" : "password"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        aria-describedby={describedBy}
         placeholder={placeholder}
         autoComplete="off"
         spellCheck={false}

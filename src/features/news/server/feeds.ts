@@ -177,3 +177,37 @@ export async function fetchRecentItems(feedUrls: string[], sinceMs: number): Pro
   }
   return items;
 }
+
+export interface FeedCheck {
+  /** The feed's own title, e.g. "Google Alert - Battery Product Passport" */
+  title: string;
+  itemCount: number;
+  /** ISO date of the newest item, or null when items carry no dates */
+  newest: string | null;
+}
+
+/** Reads one feed for Settings' feed check: its title, how many items, and the newest item's date. */
+export async function inspectFeed(url: string): Promise<FeedCheck> {
+  if (!isAllowedFeedUrl(url)) throw new Error("This address can't be used as a feed.");
+  const feed = await parser.parseURL(url);
+  const times = feed.items
+    .map((item) => Date.parse(item.isoDate ?? item.pubDate ?? ""))
+    .filter((t) => !Number.isNaN(t));
+  return {
+    title: cleanText(feed.title),
+    itemCount: feed.items.length,
+    newest: times.length ? new Date(Math.max(...times)).toISOString() : null,
+  };
+}
+
+/** Turns parser / network errors into a sentence a person can act on. */
+export function describeFeedError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  const status = /status code (\d{3})/i.exec(message)?.[1];
+  if (status === "404") return "Nothing at this address (404). Check the link.";
+  if (status) return `The site refused the request (${status}).`;
+  if (/ENOTFOUND|EAI_AGAIN/i.test(message)) return "That site couldn't be found. Check the address.";
+  if (/timed? ?out|ETIMEDOUT|ECONNRESET/i.test(message)) return "The site didn't respond in time. Try again.";
+  if (/can't be used as a feed/i.test(message)) return message;
+  return "This address isn't an RSS or Atom feed.";
+}

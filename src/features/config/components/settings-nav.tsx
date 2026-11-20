@@ -46,7 +46,7 @@ export function SettingsNav() {
   }, []);
 
   return (
-    <nav aria-label="Settings sections" className="sticky top-8 hidden lg:block">
+    <nav aria-label="Settings sections" className="sticky top-8 hidden self-start lg:block">
       <ul className="space-y-0.5 border-l border-line">
         {SETTINGS_SECTIONS.map(({ id, label }) => (
           <li key={id}>

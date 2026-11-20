@@ -78,7 +78,11 @@ export function ConfigFormBody({
       noValidate
     >
       <BriefSection brief={draft.brief} onChange={(brief) => patch({ brief })} />
-      <FeedsSection rows={draft.feedRows} errors={visibleErrors.feeds} onChange={(feedRows) => patch({ feedRows })} />
+      <FeedsSection
+        rows={draft.feedRows}
+        errors={visibleErrors.feeds}
+        onChange={(update) => setDraft((d) => ({ ...d, feedRows: update(d.feedRows) }))}
+      />
       <AiSection apiKey={draft.groqApiKey} model={draft.groqModel} onChange={patch} />
       <BriefingSection
         maxItems={draft.maxItems}
