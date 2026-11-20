@@ -6,9 +6,12 @@ import { registerPdfFonts } from "../shared/fonts";
 import { formatDateKey } from "../shared/format";
 import { SourcesPage } from "./sources-page";
 import { StoryPage } from "./story-page";
+import { createSlideStyles } from "./styles";
+import { dayPalette } from "../shared/theme";
 
 /**
  * Slides format (16:9): cover, one page per story with the "why it matters" panel, sources.
+ * The accent colour follows the briefing's day of the week.
  * Returns the element itself because react-pdf's `pdf()` needs a <Document> at the root.
  */
 export function buildSlidesDocument(news: DailyNews, company: string): ReactElement<DocumentProps> {
@@ -16,6 +19,7 @@ export function buildSlidesDocument(news: DailyNews, company: string): ReactElem
   const who = company.trim();
   const total = news.items.length;
   const pages = total + 2;
+  const s = createSlideStyles(dayPalette(news.date));
 
   return (
     <Document
@@ -25,7 +29,7 @@ export function buildSlidesDocument(news: DailyNews, company: string): ReactElem
       creator="Standup News"
       producer="Standup News"
     >
-      <CoverPage news={news} company={who} />
+      <CoverPage news={news} company={who} s={s} />
       {news.items.map((item, i) => (
         <StoryPage
           key={item.url}
@@ -35,9 +39,10 @@ export function buildSlidesDocument(news: DailyNews, company: string): ReactElem
           page={i + 2}
           pages={pages}
           company={who}
+          s={s}
         />
       ))}
-      <SourcesPage news={news} company={who} page={pages} />
+      <SourcesPage news={news} company={who} page={pages} s={s} />
     </Document>
   );
 }

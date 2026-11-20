@@ -33,7 +33,7 @@ function describe(choice: Choice): string {
 }
 
 /**
- * Export button + menu: four PDF formats and PowerPoint. Used on the slide deck
+ * Export button + menu: the Slides PDF (coloured by the day of the week) and PowerPoint. Used on the slide deck
  * (label "Export") and on each History day (label "Download").
  */
 export function ExportMenu({

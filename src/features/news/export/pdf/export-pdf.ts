@@ -9,12 +9,6 @@ async function buildDocument(format: PdfFormat, news: DailyNews, company: string
   switch (format) {
     case "slides":
       return (await import("./slides/slides-document")).buildSlidesDocument(news, company);
-    case "poster":
-      return (await import("./poster/poster-document")).buildPosterDocument(news, company);
-    case "memo":
-      return (await import("./memo/memo-document")).buildMemoDocument(news, company);
-    case "digest":
-      return (await import("./digest/digest-document")).buildDigestDocument(news, company);
   }
 }
 
