@@ -21,7 +21,7 @@ export function buildDigestDocument(news: DailyNews, company: string): ReactElem
       creator="Standup News"
       producer="Standup News"
     >
-      <Page size="A4" style={s.page} wrap={false}>
+      <Page size="A4" style={s.page}>
         <DigestHeader news={news} company={who} />
         {news.items.map((item, i) => (
           <DigestRow key={item.url} item={item} position={i + 1} />

@@ -32,7 +32,7 @@ export function PosterClosing({ news, company, page }: { news: DailyNews; compan
 
       <View style={s.bottom}>
         <Text style={s.meta}>Over to standup.</Text>
-        <Text style={s.page_}>{`Page ${page} of ${page}`}</Text>
+        <Text style={s.pageLabel}>{`Page ${page} of ${page}`}</Text>
       </View>
     </Page>
   );

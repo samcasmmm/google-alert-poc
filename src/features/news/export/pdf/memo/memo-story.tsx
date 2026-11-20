@@ -2,7 +2,7 @@ import { Link, Text, View } from "@react-pdf/renderer";
 import { formatTimestamp } from "@/lib/date";
 import { cleanHeadline } from "../../../headline";
 import type { NewsItem } from "../../../schema";
-import { shortUrl } from "../shared/format";
+import { fitSource, shortUrl } from "../shared/format";
 import type { MemoStyles } from "./memo-styles";
 
 /**
@@ -26,7 +26,7 @@ export function MemoStory({
     <View style={position === 1 ? [s.story, s.storyFirst] : s.story} wrap={false}>
       <View style={s.rail}>
         <Text style={s.rank}>{position}</Text>
-        <Text style={s.railSource}>{item.source || shortUrl(item.url)}</Text>
+        <Text style={s.railSource}>{fitSource(item.source || shortUrl(item.url), 22)}</Text>
         {time ? <Text style={s.railTime}>{time}</Text> : null}
       </View>
 

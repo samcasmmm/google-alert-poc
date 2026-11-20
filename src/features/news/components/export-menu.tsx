@@ -48,7 +48,8 @@ export function ExportMenu({
   /** Which edge of the button the menu lines up with */
   align?: "start" | "end";
 }) {
-  const edge = align === "start" ? "left-0 origin-top-left" : "right-0 origin-top-right";
+  // Written out in full so Tailwind generates them (from sm up; phones get a bottom sheet).
+  const edge = align === "start" ? "sm:left-0 sm:origin-top-left" : "sm:right-0 sm:origin-top-right";
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<Choice | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -189,7 +190,8 @@ export function ExportMenu({
           role="menu"
           aria-label={`${label} format`}
           onKeyDown={onMenuKeyDown}
-          className={`absolute top-full ${edge} z-30 mt-2 w-76 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-paper p-1.5 shadow-[0_12px_32px_-12px_rgb(17_17_17/0.25)] motion-safe:animate-pop`}
+          // Phones: a bottom sheet pinned to the screen edges, so it never overflows. Larger screens: a dropdown.
+          className={`fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-line bg-paper p-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_-12px_rgb(17_17_17/0.3)] motion-safe:animate-pop sm:absolute sm:inset-x-auto sm:top-full sm:bottom-auto sm:mt-2 sm:w-76 sm:rounded-xl sm:pb-1.5 sm:shadow-[0_12px_32px_-12px_rgb(17_17_17/0.25)] ${edge}`}
         >
           <div role="group" aria-labelledby={`${menuId}-pdf`}>
             <p id={`${menuId}-pdf`} className="px-3 pt-2 pb-1 text-xs font-medium text-muted">
@@ -213,7 +215,7 @@ export function ExportMenu({
       {error && (
         <p
           role="alert"
-          className={`absolute top-full ${edge} z-30 mt-2 w-64 rounded-lg border border-accent/30 bg-accent-soft px-3 py-2 text-sm text-accent`}
+          className={`fixed inset-x-3 bottom-3 z-40 rounded-lg border border-accent/30 bg-accent-soft px-3 py-2 text-sm text-accent sm:absolute sm:inset-x-auto sm:top-full sm:bottom-auto sm:mt-2 sm:w-64 ${edge}`}
         >
           {error}
         </p>

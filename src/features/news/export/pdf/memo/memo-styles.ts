@@ -43,7 +43,7 @@ export function createMemoStyles(p: Palette) {
     rank: { fontFamily: "Newsreader", fontWeight: 500, fontSize: 22, lineHeight: 1, color: p.accent },
     railSource: { fontWeight: 600, fontSize: 8.5, marginTop: 8, lineHeight: 1.3 },
     railTime: { fontSize: 8, color: p.muted, marginTop: 2 },
-    main: { flex: 1, marginLeft: MEMO.gutter },
+    main: { width: A4.width - MEMO.marginX * 2 - MEMO.railWidth - MEMO.gutter, marginLeft: MEMO.gutter },
     headline: { fontFamily: "Newsreader", fontWeight: 500, fontSize: 16, lineHeight: 1.22, color: p.ink, textDecoration: "none" },
     summary: { fontSize: 9.5, lineHeight: 1.6, color: p.body, marginTop: 6 },
     why: {

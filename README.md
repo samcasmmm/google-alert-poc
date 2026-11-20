@@ -35,7 +35,12 @@ Click **Save settings**. The values are stored in IndexedDB, so you only enter t
   - `F` toggles fullscreen.
   - **Fetch again** on the title slide fetches today's news again.
 - **`/history`**: every saved day, grouped by month. Search all saved stories (`/` focuses search); click a headline to open that day's slides at that story, download any day as PDF, or delete a day (with Undo).
-- **Export (slide deck header):** **PDF** downloads a 16:9 PDF built in the browser (no print dialog, so paper size and printer settings can't change it): a cover with clickable contents, one page per story with "why it matters" in a vermilion panel, and a sources page with every link. **PowerPoint** downloads an editable `.pptx` with the summary and link in the speaker notes.
+- **Export (slide deck header, and "Download" on each History day):** four PDF designs, all built in the browser (no print dialog, so paper size and printer settings can't change them), plus PowerPoint:
+  - **Slides** (16:9): cover with clickable contents, one page per story with "why it matters" in a vermilion panel, sources page.
+  - **Poster** (16:9): every headline stacked large on the cover, then one oversized black headline per page with what happened and why it matters side by side.
+  - **Memo** (A4): magazine-style reading copy; rank, source and time in a side column, serif headlines, a ruled "why it matters" note; stories never split across pages.
+  - **One-page digest** (A4): every story as a ranked row on a single page, headlines linked to the articles.
+  - **PowerPoint**: editable `.pptx` with the summary and link in the speaker notes.
 - **`/settings`**: company brief, news sources (named feeds; paste several URLs at once), AI summaries (Groq key and model), briefing options (stories per day, time zone, slide layout) and Backup (download / restore all data as JSON). A save bar appears when there are unsaved changes; `Ctrl/Cmd+S` saves.
 
 ### How news is fetched
@@ -56,13 +61,15 @@ src/
   app/                    Routes only (Next.js App Router). Pages stay thin and import from features/.
     api/news/route.ts     POST /api/news: fetch feeds, rank with Groq, return the day's briefing
   components/             Shared UI with no feature knowledge: site-header, app-nav, page-shell,
-                          blank-screen, reveal-text, icons (one icon-set module), ui (class strings)
+                          blank-screen, reveal-text, searchable-select (the app's dropdown),
+                          icons (one icon-set module), ui (class strings)
   features/
     config/               Settings: schema.ts (zod), config.ts (IndexedDB load/save), preset.ts,
                           draft.ts (form working copy, dirty check, validation)
       components/         config-form, config-form-body, settings-nav, save-bar, form-section, form-field,
                           brief-section, feeds-section, feed-row, add-feeds-field, ai-section, secret-input,
-                          briefing-section, story-count-picker, layout-picker, layout-preview, data-section
+                          briefing-section, story-count-picker, time-zone-picker, model-picker,
+                          layout-picker, layout-preview, data-section
     history/              search.ts (story search + month grouping)
       components/         history-list, history-search, history-month, history-day, history-story,
                           highlight, history-empty, delete-notice
@@ -79,10 +86,14 @@ src/
         export-menu.tsx   Export button and menu
       export/             File builders (no React UI)
         file-name.ts      File names + download helper
-        pdf/              react-pdf: briefing-document, cover-page, story-page, sources-page,
-                          page-footer, styles, theme, fonts, format, export-pdf
+        pdf/              react-pdf. formats.ts (the 4 designs), export-pdf.ts (loads only the chosen one)
+          shared/         fonts, theme (page sizes, palette), format helpers
+          slides/         slides-document, cover-page, story-page, sources-page, page-footer, styles
+          poster/         poster-document, poster-cover, poster-story, poster-closing, poster-styles
+          memo/           memo-document, memo-masthead, memo-story, memo-page-furniture, memo-styles
+          digest/         digest-document, digest-header, digest-row, digest-styles
         pptx/             export-pptx (pptxgenjs)
-  lib/                    Framework-agnostic helpers: db (Dexie), date, backup, use-today
+  lib/                    Framework-agnostic helpers: db (Dexie), date, time-zones, backup, use-today
 public/fonts/             Static Newsreader + Geist TTFs (OFL) embedded in the PDF
 ```
 

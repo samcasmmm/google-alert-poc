@@ -2,7 +2,7 @@ import { Link, Text, View } from "@react-pdf/renderer";
 import { formatTimestamp } from "@/lib/date";
 import { cleanHeadline } from "../../../headline";
 import type { NewsItem } from "../../../schema";
-import { shortUrl } from "../shared/format";
+import { fitSource, shortUrl } from "../shared/format";
 import { digestStyles as s } from "./digest-styles";
 
 /**
@@ -16,13 +16,14 @@ export function DigestRow({ item, position }: { item: NewsItem; position: number
     <View style={position === 1 ? [s.row, s.rowFirst] : s.row} wrap={false}>
       <Text style={s.number}>{position}</Text>
       <View style={s.main}>
-        <Link src={item.url} style={s.headline}>
-          {cleanHeadline(item.title)}
+        {/* Line clamps only apply to <Text>, so the headline text sits inside the link. */}
+        <Link src={item.url} style={s.headlineLink}>
+          <Text style={s.headline}>{cleanHeadline(item.title)}</Text>
         </Link>
         {note ? <Text style={s.note}>{note}</Text> : null}
       </View>
       <View style={s.side}>
-        <Text style={s.source}>{item.source || shortUrl(item.url)}</Text>
+        <Text style={s.source}>{fitSource(item.source || shortUrl(item.url), 24)}</Text>
         {time ? <Text style={s.time}>{time}</Text> : null}
       </View>
     </View>

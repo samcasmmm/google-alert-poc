@@ -27,6 +27,11 @@ export function shortUrl(url: string): string {
   }
 }
 
+/** Long source names (often one unbreakable domain) get an ellipsis so they can't overflow narrow columns. */
+export function fitSource(source: string, max = 26): string {
+  return source.length > max ? `${source.slice(0, max - 1)}…` : source;
+}
+
 export function storyCount(n: number): string {
   return `${n} ${n === 1 ? "story" : "stories"}`;
 }

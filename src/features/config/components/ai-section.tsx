@@ -1,7 +1,6 @@
-import { inputClass } from "@/components/ui";
-import { DEFAULT_MODEL, SUGGESTED_MODELS } from "../schema";
 import { FormField } from "./form-field";
 import { FormSection } from "./form-section";
+import { ModelPicker } from "./model-picker";
 import { SecretInput } from "./secret-input";
 
 /** Groq key and model: what writes the summaries and "why it matters" lines. */
@@ -42,21 +41,8 @@ export function AiSection({
           <SecretInput id="cfg-key" value={apiKey} onChange={(v) => onChange({ groqApiKey: v })} placeholder="gsk_…" />
         </FormField>
 
-        <FormField label="Model" hint={`Leave empty to use ${DEFAULT_MODEL}.`} htmlFor="cfg-model">
-          <input
-            id="cfg-model"
-            value={model}
-            onChange={(e) => onChange({ groqModel: e.target.value })}
-            placeholder={DEFAULT_MODEL}
-            list="groq-models"
-            spellCheck={false}
-            className={`${inputClass} font-mono text-sm sm:max-w-sm`}
-          />
-          <datalist id="groq-models">
-            {SUGGESTED_MODELS.map((m) => (
-              <option key={m} value={m} />
-            ))}
-          </datalist>
+        <FormField label="Model" hint="Pick one, or type any model id your key can use." htmlFor="cfg-model">
+          <ModelPicker id="cfg-model" value={model} onChange={(v) => onChange({ groqModel: v })} />
         </FormField>
       </div>
     </FormSection>

@@ -41,7 +41,7 @@ export function PosterStory({
       </View>
 
       <View style={s.columns}>
-        <View style={s.column}>
+        <View style={why ? s.column : s.columnWide}>
           <Text style={s.label}>What happened</Text>
           <Text style={s.summary}>{item.summary || "No summary in the feed."}</Text>
         </View>
@@ -60,7 +60,7 @@ export function PosterStory({
         <Link src={item.url} style={s.link}>
           Read the full article
         </Link>
-        <Text style={s.page_}>{`Page ${page} of ${pages}`}</Text>
+        <Text style={s.pageLabel}>{`Page ${page} of ${pages}`}</Text>
       </View>
     </Page>
   );

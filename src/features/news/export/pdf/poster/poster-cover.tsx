@@ -2,7 +2,7 @@ import { Link, Page, Text, View } from "@react-pdf/renderer";
 import { cleanHeadline } from "../../../headline";
 import type { DailyNews } from "../../../schema";
 import { formatDateKey, storyCount } from "../shared/format";
-import { PAGE_SIZE } from "../shared/theme";
+import { COLOR, PAGE_SIZE } from "../shared/theme";
 import { posterStyles as s } from "./poster-styles";
 
 /** Cover: the day's headlines set large and stacked, each linking to its page. */
@@ -16,7 +16,7 @@ export function PosterCover({ news, company }: { news: DailyNews; company: strin
 
       <View style={s.index}>
         {news.items.map((item, i) => (
-          <Link key={item.url} src={`#poster-${i + 1}`} style={{ textDecoration: "none", color: s.page.color }}>
+          <Link key={item.url} src={`#poster-${i + 1}`} style={{ textDecoration: "none", color: COLOR.ink }}>
             <View style={s.indexRow}>
               <Text style={s.indexNum}>{i + 1}</Text>
               <Text style={s.indexTitle}>{cleanHeadline(item.title)}</Text>

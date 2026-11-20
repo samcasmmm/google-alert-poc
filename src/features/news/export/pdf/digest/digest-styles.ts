@@ -9,8 +9,6 @@ export const DIGEST = { margin: 44, numberWidth: 26, sourceWidth: 104 } as const
 
 export const digestStyles = StyleSheet.create({
   page: {
-    width: A4.width,
-    height: A4.height,
     padding: DIGEST.margin,
     paddingBottom: 60,
     backgroundColor: COLOR.paper,
@@ -27,19 +25,12 @@ export const digestStyles = StyleSheet.create({
   row: { flexDirection: "row", paddingVertical: 11, borderTopWidth: 0.75, borderTopColor: COLOR.line },
   rowFirst: { borderTopWidth: 1.25, borderTopColor: COLOR.ink },
   number: { width: DIGEST.numberWidth, fontWeight: 600, fontSize: 11, color: COLOR.accent },
-  main: { flex: 1, paddingRight: 14 },
-  headline: {
-    fontWeight: 600,
-    fontSize: 11.5,
-    lineHeight: 1.3,
-    color: COLOR.ink,
-    textDecoration: "none",
-    maxLines: 2,
-    textOverflow: "ellipsis",
-  },
+  main: { width: A4.width - DIGEST.margin * 2 - DIGEST.numberWidth - DIGEST.sourceWidth, paddingRight: 14 },
+  headlineLink: { color: COLOR.ink, textDecoration: "none" },
+  headline: { fontWeight: 600, fontSize: 11.5, lineHeight: 1.3, maxLines: 2, textOverflow: "ellipsis" },
   note: { fontSize: 9.5, lineHeight: 1.45, color: COLOR.body, marginTop: 3, maxLines: 2, textOverflow: "ellipsis" },
   side: { width: DIGEST.sourceWidth, alignItems: "flex-end" },
-  source: { fontWeight: 500, fontSize: 8.5, textAlign: "right" },
+  source: { fontWeight: 500, fontSize: 8.5, textAlign: "right", maxLines: 2, textOverflow: "ellipsis" },
   time: { fontSize: 8, color: COLOR.muted, marginTop: 2, textAlign: "right" },
 
   footer: {
